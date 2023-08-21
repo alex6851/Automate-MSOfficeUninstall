@@ -1,6 +1,7 @@
 
 
-
+#when the script is done uninstalling it will send you an email
+#But you still need to provide the script SMTP server info.
 $email = Read-Host "Input email address to receive an email notification when this is complete:"
 
 while (( $Email -notmatch '@.*\..*')) {
@@ -9,6 +10,7 @@ while (( $Email -notmatch '@.*\..*')) {
 
 $Continue = Read-host "This will CLOSE all of your Office applications. Make sure you have saved all your work. Are you ready to continue? Y/N"
 
+#List of all MS office application services that the script will attempt to close.
 if ($Continue -imatch "^Y$") {
     $OfficeServices = @(
         "lync",
@@ -35,9 +37,10 @@ if ($Continue -imatch "^Y$") {
 
 
 
-
+    #Getting all existing processes running
     [System.Collections.ArrayList]$Processes = Get-Process
 
+    #Closing all MS Office applications
     foreach ($officeService in $officeServices) {
         for ($i = 0; $i -lt $Processes.Count) {
             $Process = $Processes[$i]
@@ -81,7 +84,9 @@ if ($Continue -imatch "^Y$") {
     .\SaRAcmd.exe -S OfficeScrubScenario -AcceptEula -OfficeVersion All
 
     if($SkipReboot -imatch "^Y$"){
+        #This is where you need to provide the installer for Microsoft Office if you want it to automatically install MS Office
         \\PathToOfficeInstaller\setup.exe /configure \\PathtoOfficeXMLFile\configuration.xml
+                #Here is where you need to provide the SMTP server info
          Send-MailMessage -Subject "Office re-installation was finished on $($env:COMPUTERNAME)" -To $email -From "Office-AutomatedReinstall@mrcy.com" -SmtpServer "SMTPserverName"
     }
     $files = Get-childitem -Filter "saracmd*"
@@ -100,6 +105,7 @@ if ($Continue -imatch "^Y$") {
     }
 
     if($SkipReboot -imatch "^N$"){
+        #Here is where you need to provide the SMTP server info
         Send-MailMessage -Subject "Office un-installation was finished on $($env:COMPUTERNAME)" -BodyAsHtml "<h3>Waiting for Confirmation before computer will restart.</h3>" -To $email -From "Office-AutomatedUninstall@mrcy.com" -SmtpServer "mail.mrcy.com"
         $confirm = Read-Host "Are you ready to reboot?"
         if($confirm -imatch "^Y$"){
